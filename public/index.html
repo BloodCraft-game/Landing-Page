@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BloodCraft - A dark fantasy PvP browser game on Polygon. Your Blood. Your Craft. Your War.">
+    <title>BloodCraft - Your Blood. Your Craft. Your War.</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=REPLACE_WITH_YOUR_SITE_KEY"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1A1414;
+            --bg-card: #2A0A0A;
+            --accent: #C1272D;
+            --text: #F0E6D2;
+            --secondary-bg: #332929;
+            --shadow: rgba(193, 39, 45, 0.3);
+        }
+
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+            background-color: var(--bg-primary);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #E63946;
+        }
+
+        /* Particle Background */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-200vh) translateX(0);
+                opacity: 0;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        /* Animated SVG Background */
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23C1272D' stroke-width='1' fill='none'%3E%3Cpath d='M100 20 L120 80 L80 80 Z'/%3E%3Ccircle cx='100' cy='150' r='15'/%3E%3Cpath d='M50 100 L70 140 L30 140 Z'/%3E%3Cpath d='M150 100 L170 140 L130 140 Z'/%3E%3C/g%3E%3C/svg%3E");
+            animation: bgScroll 60s linear infinite;
+        }
+
+        @keyframes bgScroll {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-200px, -200px) rotate(360deg); }
+        }
+
+        /* Glowing orbs */
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse at 50% 30%, rgba(193, 39, 45, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(193, 39, 45, 0.1) 0%, transparent 40%),
+                radial-gradient(ellipse at 80% 70%, rgba(193, 39, 45, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+            animation: pulse-orbs 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse-orbs {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 1000px;
+        }
+
+        /* Logo with glitch effect */
+        .logo {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 900;
+            color: var(--accent);
+            text-align: center;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 
+                0 0 20px rgba(193, 39, 45, 0.5),
+                0 0 40px rgba(193, 39, 45, 0.3);
+            position: relative;
+        }
+
+        .logo:hover {
+            text-shadow: 
+                0 0 30px rgba(193, 39, 45, 0.8),
+                0 0 60px rgba(193, 39, 45, 0.6),
+                0 0 90px rgba(193, 39, 45, 0.4);
+            animation: glitch 0.5s ease-in-out;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, -2px); }
+            80% { transform: translate(2px, 2px); }
+            100% { transform: translate(0); }
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.8rem);
+            margin-bottom: 1rem;
+            opacity: 0.9;
+            text-align: center;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .hero-description {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            max-width: 700px;
+            text-align: center;
+            opacity: 0.7;
+            margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+
+        .cta-container {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 4rem;
+        }
+
+        .btn {
+            font-family: 'IBM Plex Mono', monospace;
+            padding: 1.2rem 3rem;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--text);
+            border-color: var(--accent);
+            box-shadow: 0 4px 15px rgba(193, 39, 45, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(193, 39, 45, 0.6);
+            animation: pulse-btn 1.5s infinite;
+        }
+
+        @keyframes pulse-btn {
+            0%, 100% { box-shadow: 0 8px 30px rgba(193, 39, 45, 0.6); }
+            50% { box-shadow: 0 8px 50px rgba(193, 39, 45, 0.9); }
+        }
+
+        .btn-secondary {
+            background: var(--secondary-bg);
+            color: #888;
+            border-color: var(--secondary-bg);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Waitlist Section with 3D transform */
+        .waitlist-section {
+            background: var(--bg-card);
+            border: 2px solid rgba(193, 39, 45, 0.4);
+            padding: 3rem;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            margin-top: 3rem;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .waitlist-section::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--accent), transparent, var(--accent));
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .waitlist-section:hover::before {
+            opacity: 1;
+            animation: border-glow 2s linear infinite;
+        }
+
+        @keyframes border-glow {
+            0%, 100% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .waitlist-section h3 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 2.2rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(193, 39, 45, 0.5);
+        }
+
+        .waitlist-section > p {
+            font-size: 1.05rem;
+            opacity: 0.85;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .waitlist-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .form-input {
+            font-family: 'IBM Plex Mono', monospace;
+            padding: 1.2rem;
+            font-size: 1rem;
+            background: var(--bg-primary);
+            border: 2px solid rgba(193, 39, 45, 0.3);
+            color: var(--text);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(193, 39, 45, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .form-input::placeholder {
+            color: rgba(240, 230, 210, 0.4);
+        }
+
+        .form-input.error {
+            border-color: #ff4444;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-hint {
+            font-size: 0.75rem;
+            color: rgba(240, 230, 210, 0.5);
+            margin-top: 0.3rem;
+            text-align: left;
+        }
+
+        .btn-submit {
+            font-family: 'IBM Plex Mono', monospace;
+            padding: 1.3rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            background: var(--accent);
+            color: var(--text);
+            border: 2px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(193, 39, 45, 0.4);
+        }
+
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-submit:hover::after {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(193, 39, 45, 0.7);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-message {
+            padding: 1.2rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-message.success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 2px solid rgba(40, 167, 69, 0.6);
+            color: #7FFF7F;
+            display: block;
+        }
+
+        .form-message.error {
+            background: rgba(193, 39, 45, 0.2);
+            border: 2px solid rgba(193, 39, 45, 0.6);
+            color: var(--accent);
+            display: block;
+        }
+
+        .waitlist-count {
+            margin-top: 2rem;
+            font-size: 1rem;
+            opacity: 0.7;
+            letter-spacing: 0.1em;
+        }
+
+        .waitlist-count strong {
+            color: var(--accent);
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px rgba(193, 39, 45, 0.5);
+        }
+
+        /* Section Headers */
+        .section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 30px rgba(193, 39, 45, 0.5);
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            animation: expand 2s ease-in-out infinite;
+        }
+
+        @keyframes expand {
+            0%, 100% { width: 100px; }
+            50% { width: 200px; }
+        }
+
+        .section-subtitle {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Factions Section */
+        .factions {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(193, 39, 45, 0.05) 50%, var(--bg-primary) 100%);
+        }
+
+        .factions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .faction-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(193, 39, 45, 0.3);
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px);
+            cursor: pointer;
+        }
+
+        .faction-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(193, 39, 45, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .faction-card:hover::before {
+            opacity: 1;
+        }
+
+        .faction-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-10px) rotate(2deg) scale(1.05);
+            box-shadow: 0 20px 60px rgba(193, 39, 45, 0.4);
+        }
+
+        .faction-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            stroke: var(--accent);
+            stroke-width: 2;
+            fill: none;
+            filter: drop-shadow(0 0 10px rgba(193, 39, 45, 0.5));
+            transition: transform 0.5s ease;
+        }
+
+        .faction-card:hover .faction-icon {
+            transform: scale(1.2) rotate(360deg);
+            filter: drop-shadow(0 0 20px rgba(193, 39, 45, 0.8));
+        }
+
+        .faction-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 15px rgba(193, 39, 45, 0.5);
+        }
+
+        .faction-tagline {
+            font-size: 1.1rem;
+            opacity: 0.85;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .faction-description {
+            font-size: 0.95rem;
+            opacity: 0.7;
+            line-height: 1.7;
+            margin-top: 1rem;
+        }
+
+        .faction-perks {
+            list-style: none;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .faction-perks li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .faction-perks li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Core Loop */
+        .core-loop {
+            background: var(--bg-primary);
+        }
+
+        .loop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .loop-item {
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+            padding: 2rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(193, 39, 45, 0.05), transparent);
+        }
+
+        .loop-item:hover {
+            background: linear-gradient(135deg, rgba(193, 39, 45, 0.1), rgba(193, 39, 45, 0.05));
+            transform: translateY(-10px);
+        }
+
+        .loop-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            stroke: var(--accent);
+            stroke-width: 2;
+            fill: none;
+            filter: drop-shadow(0 0 15px rgba(193, 39, 45, 0.5));
+            transition: all 0.5s ease;
+        }
+
+        .loop-item:hover .loop-icon {
+            transform: scale(1.15) rotate(10deg);
+            filter: drop-shadow(0 0 25px rgba(193, 39, 45, 0.8));
+        }
+
+        .loop-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1.6rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(193, 39, 45, 0.3);
+        }
+
+        .loop-desc {
+            font-size: 1rem;
+            opacity: 0.75;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .loop-details {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            line-height: 1.6;
+            margin-top: 1rem;
+        }
+
+        /* UI Mode Toggle */
+        .ui-mode {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(193, 39, 45, 0.03) 50%, var(--bg-primary) 100%);
+        }
+
+        .toggle-switch {
+            display: inline-flex;
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            border-radius: 50px;
+            padding: 0.6rem;
+            margin: 2rem 0 3rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(193, 39, 45, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 50px;
+            transition: transform 0.3s ease;
+            z-index: 0;
+        }
+
+        .toggle-switch.modern::before {
+            transform: translateX(100%);
+        }
+
+        .toggle-option {
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            border-radius: 50px;
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .toggle-option.active {
+            color: var(--text);
+        }
+
+        .ui-previews {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .ui-preview {
+            background: var(--bg-card);
+            border: 2px solid rgba(193, 39, 45, 0.3);
+            padding: 2.5rem;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ui-preview::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(193, 39, 45, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .ui-preview:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(193, 39, 45, 0.4);
+        }
+
+        .ui-preview:hover::before {
+            opacity: 1;
+        }
+
+        .preview-label {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 10px rgba(193, 39, 45, 0.5);
+        }
+
+        .preview-content {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            text-align: left;
+            width: 100%;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .tagline {
+            margin-top: 2.5rem;
+            font-size: 1.2rem;
+            opacity: 0.85;
+            font-style: italic;
+        }
+
+        /* Tokenomics Section */
+        .tokenomics {
+            background: var(--bg-primary);
+        }
+
+        .tokenomics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .token-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(193, 39, 45, 0.3);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .token-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(193, 39, 45, 0.3);
+        }
+
+        .token-percentage {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .token-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .token-desc {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        footer {
+            padding: 5rem 2rem 3rem;
+            text-align: center;
+            border-top: 1px solid rgba(193, 39, 45, 0.2);
+            background: var(--bg-card);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            stroke: var(--text);
+            stroke-width: 2;
+            fill: none;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            filter: drop-shadow(0 0 5px rgba(193, 39, 45, 0.3));
+        }
+
+        .social-icon:hover {
+            stroke: var(--accent);
+            transform: translateY(-5px) rotate(360deg);
+            filter: drop-shadow(0 0 15px rgba(193, 39, 45, 0.8));
+        }
+
+        .disclaimer {
+            font-size: 0.85rem;
+            opacity: 0.6;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cta-container {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .waitlist-section {
+                padding: 2rem 1.5rem;
+            }
+
+            .section {
+                padding: 4rem 1.5rem;
+            }
+
+            .social-icons {
+                gap: 2rem;
+            }
+
+            .social-icon {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle Background -->
+    <div id="particles"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="logo" id="logo">BLOODCRAFT</h1>
+            <p class="subtitle" id="subtitle"></p>
+            <p class="hero-description">
+                Enter a brutal dark fantasy world where every decision matters. Build your dominion, 
+                hunt in cursed forests, and wage war against rival factions in this free-to-play, 
+                blockchain-powered PvP experience on Polygon Network.
+            </p>
+            <div class="cta-container">
+                <button class="btn btn-primary" onclick="window.open('https://t.me/bloodcraft', '_blank')">
+                    <span style="position: relative; z-index: 1;">JOIN TELEGRAM</span>
+                </button>
+                <button class="btn btn-secondary">
+                    <span style="position: relative; z-index: 1;">WHITELIST (SOON)</span>
+                </button>
+            </div>
+
+            <!-- Waitlist Form -->
+            <div class="waitlist-section">
+                <h3>Join the Waitlist</h3>
+                <p>Be the first to spill blood in the arena. Early access warriors get exclusive NFT rewards and governance tokens.</p>
+                <form class="waitlist-form" id="waitlistForm">
+                    <div class="input-wrapper">
+                        <input 
+                            type="email" 
+                            class="form-input" 
+                            id="emailInput" 
+                            placeholder="your.email@domain.com" 
+                            required
+                        >
+                        <div class="input-hint">We'll never share your email with third parties</div>
+                    </div>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            class="form-input" 
+                            id="walletInput" 
+                            placeholder="0x... Wallet Address (Optional)" 
+                        >
+                        <div class="input-hint">Connect your Ethereum/Polygon wallet for NFT airdrops</div>
+                    </div>
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <span style="position: relative; z-index: 1;">CLAIM YOUR SPOT</span>
+                    </button>
+                    <div class="form-message" id="formMessage"></div>
+                </form>
+                <div class="waitlist-count">
+                    <strong id="countNumber">...</strong> warriors ready for battle
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Factions Section -->
+    <section class="section factions">
+        <div class="section-header">
+            <h2 class="section-title">CHOOSE YOUR PATH</h2>
+            <p class="section-subtitle">
+                Two ancient factions wage eternal war. Each offers unique abilities, strategies, and paths to power. 
+                Your choice will define your destiny in the blood-soaked lands.
+            </p>
+        </div>
+        <div class="factions-grid">
+            <div class="faction-card" data-faction="cult">
+                <svg class="faction-icon" viewBox="0 0 100 100">
+                    <path d="M50 10 L40 25 L30 30 L25 40 L25 50 L30 60 L35 70 L50 75 L65 70 L70 60 L75 50 L75 40 L70 30 L60 25 Z"/>
+                    <circle cx="38" cy="45" r="5"/>
+                    <circle cx="62" cy="45" r="5"/>
+                    <path d="M35 60 Q50 65 65 60"/>
+                    <line x1="50" y1="10" x2="50" y2="25"/>
+                </svg>
+                <h3 class="faction-title">Cult of the Damned</h3>
+                <p class="faction-tagline">"Steal. Curse. Rule."</p>
+                <p class="faction-description">
+                    Masters of dark rituals and forbidden magic. The Cult excels at resource manipulation, 
+                    draining enemies while empowering allies. Perfect for strategists who prefer cunning over brute force.
+                </p>
+                <ul class="faction-perks">
+                    <li><strong>Shadow Theft:</strong> Steal resources from weaker opponents</li>
+                    <li><strong>Curse Mastery:</strong> Debuff enemies for 3 turns</li>
+                    <li><strong>Blood Pact:</strong> Sacrifice HP for powerful spells</li>
+                    <li><strong>Necromancy:</strong> Summon fallen warriors</li>
+                </ul>
+            </div>
+
+            <div class="faction-card" data-faction="sect">
+                <svg class="faction-icon" viewBox="0 0 100 100">
+                    <circle cx="50" cy="30" r="18"/>
+                    <line x1="45" y1="25" x2="40" y2="15"/>
+                    <line x1="50" y1="22" x2="50" y2="10"/>
+                    <line x1="55" y1="25" x2="60" y2="15"/>
+                    <line x1="58" y1="30" x2="68" y2="25"/>
+                    <line x1="58" y1="35" x2="68" y2="40"/>
+                    <line x1="42" y1="30" x2="32" y2="25"/>
+                    <line x1="42" y1="35" x2="32" y2="40"/>
+                    <rect x="47" y="45" width="6" height="45" rx="2"/>
+                </svg>
+                <h3 class="faction-title">Sect of the Possessed</h3>
+                <p class="faction-tagline">"Counter. Rage. Break."</p>
+                <p class="faction-description">
+                    Berserker warriors channeling demonic fury. The Sect dominates through raw power and 
+                    devastating counterattacks. Ideal for aggressive players who thrive in direct combat.
+                </p>
+                <ul class="faction-perks">
+                    <li><strong>Berserker Rage:</strong> +50% damage when below 30% HP</li>
+                    <li><strong>Demon Armor:</strong> Reflect 25% of damage taken</li>
+                    <li><strong>Chain Breaker:</strong> Immune to all crowd control</li>
+                    <li><strong>Blood Frenzy:</strong> Each kill grants stacking buffs</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Loop Section -->
+    <section class="section core-loop">
+        <div class="section-header">
+            <h2 class="section-title">THE CYCLE OF BLOOD</h2>
+            <p class="section-subtitle">
+                Master three interconnected systems to dominate the battlefield. 
+                Every action feeds into the next, creating a brutal economy of violence and power.
+            </p>
+        </div>
+        <div class="loop-grid">
+            <div class="loop-item">
+                <svg class="loop-icon" viewBox="0 0 100 100">
+                    <rect x="20" y="40" width="60" height="50"/>
+                    <rect x="30" y="30" width="15" height="10"/>
+                    <rect x="55" y="30" width="15" height="10"/>
+                    <polygon points="50,10 35,30 65,30"/>
+                    <rect x="42" y="65" width="16" height="25"/>
+                    <line x1="20" y1="35" x2="20" y2="30"/>
+                    <line x1="30" y1="35" x2="30" y2="25"/>
+                    <line x1="40" y1="35" x2="40" y2="30"/>
+                    <line x1="60" y1="35" x2="60" y2="30"/>
+                    <line x1="70" y1="35" x2="70" y2="25"/>
+                    <line x1="80" y1="35" x2="80" y2="30"/>
+                </svg>
+                <h3 class="loop-title">BUILD</h3>
+                <p class="loop-desc">Fortify your domain with cursed structures and dark defenses</p>
+                <p class="loop-details">
+                    Construct Blood Altars, Obsidian Towers, and Ritual Chambers. 
+                    Each building generates passive resources and unlocks powerful abilities. 
+                    Upgrade your stronghold to withstand enemy sieges.
+                </p>
+            </div>
+
+            <div class="loop-item">
+                <svg class="loop-icon" viewBox="0 0 100 100">
+                    <path d="M30 60 Q35 45 50 40 Q65 45 70 60"/>
+                    <circle cx="40" cy="35" r="8"/>
+                    <circle cx="60" cy="35" r="8"/>
+                    <polygon points="25,30 30,20 35,30"/>
+                    <polygon points="65,30 70,20 75,30"/>
+                    <circle cx="42" cy="34" r="2"/>
+                    <circle cx="58" cy="34" r="2"/>
+                    <path d="M45 45 L50 48 L55 45"/>
+                    <path d="M20 65 L30 60 L30 75 L25 85"/>
+                    <path d="M80 65 L70 60 L70 75 L75 85"/>
+                </svg>
+                <h3 class="loop-title">HUNT</h3>
+                <p class="loop-desc">Feed on the blighted woods and corrupt dungeons</p>
+                <p class="loop-details">
+                    Venture into procedurally generated PvE zones. Slay corrupted beasts, 
+                    loot legendary artifacts, and gather Blood Essence. Higher risk zones 
+                    yield greater rewards but attract other players.
+                </p>
+            </div>
+
+            <div class="loop-item">
+                <svg class="loop-icon" viewBox="0 0 100 100">
+                    <line x1="25" y1="25" x2="75" y2="75" stroke-width="4"/>
+                    <line x1="75" y1="25" x2="25" y2="75" stroke-width="4"/>
+                    <rect x="22" y="22" width="10" height="6" rx="1"/>
+                    <rect x="68" y="72" width="10" height="6" rx="1"/>
+                    <rect x="68" y="22" width="10" height="6" rx="1"/>
+                    <rect x="22" y="72" width="10" height="6" rx="1"/>
+                </svg>
+                <h3 class="loop-title">STEAL</h3>
+                <p class="loop-desc">Take from the weak, dominate the strong</p>
+                <p class="loop-details">
+                    Launch raids on enemy territories. Plunder resources, capture prisoners, 
+                    and destroy rival structures. Successful attacks earn you reputation and 
+                    unlock exclusive NFT trophies. Defend or be destroyed.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- UI Mode Toggle Section -->
+    <section class="section ui-mode">
+        <div class="section-header">
+            <h2 class="section-title">CHOOSE YOUR INTERFACE</h2>
+            <p class="section-subtitle">
+                Experience BloodCraft your way. Switch between classic ASCII-style terminal UI 
+                for veterans or modern NFT card interface for new players. Both modes offer the same gameplay.
+            </p>
+        </div>
+        <div class="toggle-switch" id="uiToggle">
+            <div class="toggle-option active">◀ CLASSIC</div>
+            <div class="toggle-option">MODERN ▶</div>
+        </div>
+        <div class="ui-previews">
+            <div class="ui-preview">
+                <div class="preview-label">CLASSIC MODE</div>
+                <div class="preview-content">
+┌─────────────────────────┐<br>
+│ HP: 85/100  MP: 40/50   │<br>
+│ GOLD: 1,250  BLOOD: 34  │<br>
+├─────────────────────────┤<br>
+│ [1] ATTACK              │<br>
+│ [2] DEFEND              │<br>
+│ [3] CAST SPELL          │<br>
+│ [4] USE ITEM            │<br>
+│ [5] RETREAT             │<br>
+└─────────────────────────┘<br><br>
+> Enemy approaches from N<br>
+> Type command: _
+                </div>
+            </div>
+            <div class="ui-preview">
+                <div class="preview-label">MODERN MODE</div>
+                <div class="preview-content">
+╔═══════════════════════╗<br>
+║  🎭 Character NFT     ║<br>
+║  Lvl 12 Blood Knight  ║<br>
+╠═══════════════════════╣<br>
+║ ▮▮▮▮▮▮▮▮░░ 85 HP     ║<br>
+║ 🔮 Mana: 40/50        ║<br>
+║ 💰 1,250 Gold         ║<br>
+║ 🩸 34 Blood Essence   ║<br>
+╠═══════════════════════╣<br>
+║ [⚔️ Attack] [🛡️ Defend] ║<br>
+║ [✨ Cast]   [🎒 Items]  ║<br>
+╚═══════════════════════╝
+                </div>
+            </div>
+        </div>
+        <p class="tagline">Play your way. Switch anytime. No penalties, just preference.</p>
+    </section>
+
+    <!-- Tokenomics Section -->
+    <section class="section tokenomics">
+        <div class="section-header">
+            <h2 class="section-title">TOKENOMICS</h2>
+            <p class="section-subtitle">
+                Fair launch with no pre-sale. $BLOOD token powers the entire ecosystem, 
+                from governance to in-game purchases. Earn by playing, hold for rewards.
+            </p>
+        </div>
+        <div class="tokenomics-grid">
+            <div class="token-card">
+                <div class="token-percentage">40%</div>
+                <div class="token-label">Play-to-Earn Rewards</div>
+                <div class="token-desc">Distributed over 5 years to active players</div>
+            </div>
+            <div class="token-card">
+                <div class="token-percentage">25%</div>
+                <div class="token-label">Liquidity Pool</div>
+                <div class="token-desc">Locked for 2 years on Uniswap/QuickSwap</div>
+            </div>
+            <div class="token-card">
+                <div class="token-percentage">20%</div>
+                <div class="token-label">Development Fund</div>
+                <div class="token-desc">Vested over 3 years for continuous updates</div>
+            </div>
+            <div class="token-card">
+                <div class="token-percentage">15%</div>
+                <div class="token-label">Community Treasury</div>
+                <div class="token-desc">DAO-controlled for events and partnerships</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="social-icons">
+            <svg class="social-icon" viewBox="0 0 100 100" onclick="window.open('https://twitter.com/bloodcraft', '_blank')">
+                <path d="M20 20 L50 50 L20 80 M80 20 L50 50 L80 80 M30 30 L70 70 M70 30 L30 70"/>
+            </svg>
+            <svg class="social-icon" viewBox="0 0 100 100" onclick="window.open('https://t.me/bloodcraft', '_blank')">
+                <path d="M20 50 L75 25 L50 80 L40 55 Z"/>
+                <line x1="50" y1="55" x2="75" y2="25"/>
+            </svg>
+            <svg class="social-icon" viewBox="0 0 100 100" onclick="window.open('https://github.com/bloodcraft', '_blank')">
+                <circle cx="50" cy="45" r="25"/>
+                <path d="M35 65 Q35 75 30 80 M50 65 L50 80 M65 65 Q65 75 70 80"/>
+            </svg>
+            <svg class="social-icon" viewBox="0 0 100 100" onclick="window.open('https://discord.gg/bloodcraft', '_blank')">
+                <path d="M30 25 Q20 25 20 35 L20 55 Q20 65 30 65 L35 65 L35 75 L45 65 L70 65 Q80 65 80 55 L80 35 Q80 25 70 25 Z"/>
+                <circle cx="40" cy="45" r="5"/>
+                <circle cx="60" cy="45" r="5"/>
+            </svg>
+        </div>
+        <p class="disclaimer">
+            BloodCraft is a fictional dark fantasy game. This landing page is for demonstration purposes. 
+            Cryptocurrency investments carry risk. Not financial advice. Play responsibly. 
+            Game mechanics and tokenomics are subject to change during development.
+        </p>
+        <p style="margin-top: 1.5rem; opacity: 0.5; font-size: 0.8rem;">
+            © 2024 BloodCraft. Built on Polygon. Powered by the community.
+        </p>
+    </footer>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const RECAPTCHA_SITE_KEY = 'REPLACE_WITH_YOUR_SITE_KEY'; // Get from Google reCAPTCHA
+        const API_ENDPOINT = '/api/waitlist'; // Vercel serverless function
+
+        // ============================================
+        // PARTICLE BACKGROUND
+        // ============================================
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // ============================================
+        // GSAP ANIMATIONS
+        // ============================================
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Typewriter subtitle
+        const subtitleText = "Your Blood. Your Craft. Your War.";
+        const subtitleEl = document.getElementById('subtitle');
+        let i = 0;
+
+        function typeWriter() {
+            if (i < subtitleText.length) {
+                subtitleEl.textContent += subtitleText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+
+        setTimeout(typeWriter, 500);
+
+        // Logo pulse
+        gsap.to('#logo', {
+            scale: 1.02,
+            duration: 2,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut"
+        });
+
+        // Faction cards animation
+        gsap.utils.toArray('.faction-card').forEach((card, index) => {
+            gsap.to(card, {
+                opacity: 1,
+                y: 0,
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 80%",
+                    end: "top 50%",
+                    scrub: 1
+                },
+                delay: index * 0.2
+            });
+        });
+
+        // Loop items animation
+        gsap.utils.toArray('.loop-item').forEach((item, index) => {
+            gsap.to(item, {
+                opacity: 1,
+                scale: 1,
+                scrollTrigger: {
+                    trigger: item,
+                    start: "top 80%",
+                },
+                delay: index * 0.3
+            });
+        });
+
+        // UI toggle
+        const toggleSwitch = document.getElementById('uiToggle');
+        const toggleOptions = toggleSwitch.querySelectorAll('.toggle-option');
+
+        toggleOptions.forEach((option, index) => {
+            option.addEventListener('click', () => {
+                toggleOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                if (index === 0) {
+                    toggleSwitch.classList.remove('modern');
+                } else {
+                    toggleSwitch.classList.add('modern');
+                }
+            });
+        });
+
+        // ============================================
+        // FORM VALIDATION & SUBMISSION
+        // ============================================
+        const waitlistForm = document.getElementById('waitlistForm');
+        const emailInput = document.getElementById('emailInput');
+        const walletInput = document.getElementById('walletInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const formMessage = document.getElementById('formMessage');
+        const countNumber = document.getElementById('countNumber');
+
+        // Email validation
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        // Ethereum wallet validation
+        const WALLET_REGEX = /^0x[a-fA-F0-9]{40}$/;
+
+        // Load waitlist count
+        async function loadCount() {
+            try {
+                const response = await fetch(API_ENDPOINT);
+                const data = await response.json();
+                if (data.success) {
+                    countNumber.textContent = data.count;
+                }
+            } catch (error) {
+                console.error('Error loading count:', error);
+                countNumber.textContent = '???';
+            }
+        }
+
+        loadCount();
+
+        // Form submission
+        waitlistForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const wallet = walletInput.value.trim();
+
+            // Validate email
+            if (!EMAIL_REGEX.test(email)) {
+                emailInput.classList.add('error');
+                showMessage('Please enter a valid email address', 'error');
+                setTimeout(() => emailInput.classList.remove('error'), 500);
+                return;
+            }
+
+            // Validate wallet if provided
+            if (wallet && !WALLET_REGEX.test(wallet)) {
+                walletInput.classList.add('error');
+                showMessage('Invalid wallet address. Must start with 0x and be 42 characters', 'error');
+                setTimeout(() => walletInput.classList.remove('error'), 500);
+                return;
+            }
+
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'VERIFYING...';
+
+            try {
+                // Get reCAPTCHA token
+                const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'submit' });
+
+                // Submit to API
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email,
+                        wallet: wallet || null,
+                        recaptchaToken: token
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message || 'Welcome to the BloodCraft army!', 'success');
+                    emailInput.value = '';
+                    walletInput.value = '';
+                    countNumber.textContent = data.count;
+
+                    // Success animation
+                    gsap.to('.waitlist-section', {
+                        scale: 1.03,
+                        duration: 0.3,
+                        yoyo: true,
+                        repeat: 1
+                    });
+                } else {
+                    showMessage(data.message || 'Failed to join waitlist', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'CLAIM YOUR SPOT';
+            }
+        });
+
+        function showMessage(text, type) {
+            formMessage.textContent = text;
+            formMessage.className = `form-message ${type}`;
+
+            setTimeout(() => {
+                formMessage.className = 'form-message';
+            }, 5000);
+        }
+
+        // Real-time email validation
+        emailInput.addEventListener('blur', () => {
+            if (emailInput.value && !EMAIL_REGEX.test(emailInput.value)) {
+                emailInput.classList.add('error');
+            } else {
+                emailInput.classList.remove('error');
+            }
+        });
+
+        // Real-time wallet validation
+        walletInput.addEventListener('blur', () => {
+            if (walletInput.value && !WALLET_REGEX.test(walletInput.value)) {
+                walletInput.classList.add('error');
+            } else {
+                walletInput.classList.remove('error');
+            }
+        });
+    </script>
+</body>
+</html>
