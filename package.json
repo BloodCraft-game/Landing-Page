@@ -1,0 +1,11 @@
+{
+  "name": "bloodcraft-landing",
+  "version": "1.0.0",
+  "description": "BloodCraft - Dark Fantasy Web3 Game Landing Page",
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  },
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  }
+}
