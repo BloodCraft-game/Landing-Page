@@ -1,35 +1,13 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "public/**",
-      "use": "@vercel/static"
+      "source": "/api/admin/toggle-recaptcha",
+      "destination": "/api/toggle-recaptcha"
     },
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/admin/toggle-recaptcha",
-      "dest": "/api/toggle-recaptcha.js"
-    },
-    {
-      "src": "/api/admin",
-      "dest": "/api/admin.js"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
-    }
-  ],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "RECAPTCHA_SECRET_KEY": "@recaptcha_secret_key"
-  }
+  ]
 }
