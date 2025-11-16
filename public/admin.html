@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodCraft - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1A1414;
+            --bg-card: #2A0A0A;
+            --accent: #C1272D;
+            --text: #F0E6D2;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(193, 39, 45, 0.5);
+        }
+
+        .header p {
+            opacity: 0.7;
+        }
+
+        /* Login Section */
+        .login-section {
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            padding: 3rem;
+            max-width: 500px;
+            margin: 5rem auto;
+            text-align: center;
+        }
+
+        .login-section h2 {
+            color: var(--accent);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border: 2px solid rgba(193, 39, 45, 0.3);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(193, 39, 45, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--text);
+            border-color: var(--accent);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(193, 39, 45, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border-color: rgba(193, 39, 45, 0.5);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(193, 39, 45, 0.3);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(193, 39, 45, 0.3);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            color: var(--accent);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(193, 39, 45, 0.5);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .settings-panel h2 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #555;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(193, 39, 45, 0.2);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .setting-desc {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        .setting-status {
+            padding: 0.3rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .status-enabled {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-disabled {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Table */
+        .data-table {
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h2 {
+            color: var(--accent);
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-box {
+            padding: 0.5rem 1rem;
+            background: var(--bg-primary);
+            border: 2px solid rgba(193, 39, 45, 0.3);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(193, 39, 45, 0.2);
+        }
+
+        th {
+            background: rgba(193, 39, 45, 0.1);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: rgba(193, 39, 45, 0.05);
+        }
+
+        .email-cell {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .wallet-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #7FFF7F;
+        }
+
+        .date-cell {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(193, 39, 45, 0.2);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.2);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .success-message {
+            background: rgba(40, 167, 69, 0.2);
+            border: 2px solid var(--success);
+            color: var(--success);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .table-wrapper {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div class="login-section" id="loginSection">
+            <h2>🔒 Admin Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="password">Admin Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-input" 
+                        placeholder="Enter admin password"
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn btn-primary">LOGIN</button>
+            </form>
+            <p style="margin-top: 1rem; opacity: 0.6; font-size: 0.85rem;">
+                Default password: <code>bloodcraft_admin_2024</code>
+            </p>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard">
+            <!-- Header -->
+            <div class="header">
+                <h1>🩸 BloodCraft Admin Panel</h1>
+                <p>Manage waitlist and settings</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">Total Warriors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="walletCount">0</div>
+                    <div class="stat-label">With Wallets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="todayCount">0</div>
+                    <div class="stat-label">Joined Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="weekCount">0</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div class="settings-panel">
+                <h2>⚙️ Settings</h2>
+                
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">reCAPTCHA Protection</div>
+                        <div class="setting-desc">Enable Google reCAPTCHA v3 for bot protection</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="setting-status status-enabled" id="recaptchaStatus">ENABLED</span>
+                        <label class="toggle-switch" style="margin-left: 1rem;">
+                            <input type="checkbox" id="recaptchaToggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">Rate Limiting</div>
+                        <div class="setting-desc">Limit submissions to 5 per hour per IP</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="setting-status status-enabled">ENABLED</span>
+                        <label class="toggle-switch" style="margin-left: 1rem;">
+                            <input type="checkbox" checked disabled>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">Email Validation</div>
+                        <div class="setting-desc">Validate email format (RFC 5322)</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="setting-status status-enabled">ENABLED</span>
+                        <label class="toggle-switch" style="margin-left: 1rem;">
+                            <input type="checkbox" checked disabled>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-title">Wallet Validation</div>
+                        <div class="setting-desc">Validate Ethereum wallet addresses (0x format)</div>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span class="setting-status status-enabled">ENABLED</span>
+                        <label class="toggle-switch" style="margin-left: 1rem;">
+                            <input type="checkbox" checked disabled>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="data-table">
+                <div class="table-header">
+                    <h2>📊 Waitlist Data</h2>
+                    <div class="table-controls">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-box" 
+                            placeholder="Search email or wallet..."
+                        >
+                        <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+                        <button class="btn btn-secondary" onclick="refreshData()">🔄 Refresh</button>
+                        <button class="btn btn-danger" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+
+                <div id="loadingIndicator" class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading data...</p>
+                </div>
+
+                <div class="table-wrapper" id="tableWrapper" style="display: none;">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Email</th>
+                                <th>Wallet</th>
+                                <th>IP Address</th>
+                                <th>User Agent</th>
+                                <th>Date Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const ADMIN_PASSWORD = 'bloodcraft_admin_2024'; // Change this!
+        const API_ENDPOINT = '/api/admin';
+
+        // ============================================
+        // LOGIN
+        // ============================================
+        const loginSection = document.getElementById('loginSection');
+        const dashboard = document.getElementById('dashboard');
+        const loginForm = document.getElementById('loginForm');
+
+        // Check if already logged in
+        if (localStorage.getItem('admin_logged_in') === 'true') {
+            showDashboard();
+        }
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+
+            if (password === ADMIN_PASSWORD) {
+                localStorage.setItem('admin_logged_in', 'true');
+                showDashboard();
+            } else {
+                alert('❌ Incorrect password!');
+            }
+        });
+
+        function showDashboard() {
+            loginSection.style.display = 'none';
+            dashboard.classList.add('active');
+            loadData();
+        }
+
+        function logout() {
+            localStorage.removeItem('admin_logged_in');
+            location.reload();
+        }
+
+        // ============================================
+        // LOAD DATA
+        // ============================================
+        let allData = [];
+
+        async function loadData() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const tableWrapper = document.getElementById('tableWrapper');
+
+            try {
+                const response = await fetch(API_ENDPOINT);
+                const result = await response.json();
+
+                if (result.success) {
+                    allData = result.data;
+                    updateStats(result.data);
+                    renderTable(result.data);
+                    
+                    loadingIndicator.style.display = 'none';
+                    tableWrapper.style.display = 'block';
+                } else {
+                    throw new Error(result.message || 'Failed to load data');
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                loadingIndicator.innerHTML = `
+                    <div class="error-message">
+                        ❌ Failed to load data: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function refreshData() {
+            document.getElementById('tableWrapper').style.display = 'none';
+            document.getElementById('loadingIndicator').style.display = 'block';
+            loadData();
+        }
+
+        // ============================================
+        // UPDATE STATS
+        // ============================================
+        function updateStats(data) {
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            document.getElementById('totalCount').textContent = data.length;
+            document.getElementById('walletCount').textContent = 
+                data.filter(entry => entry.wallet).length;
+            document.getElementById('todayCount').textContent = 
+                data.filter(entry => new Date(entry.createdAt) >= todayStart).length;
+            document.getElementById('weekCount').textContent = 
+                data.filter(entry => new Date(entry.createdAt) >= weekStart).length;
+        }
+
+        // ============================================
+        // RENDER TABLE
+        // ============================================
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            data.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="email-cell">${entry.email}</td>
+                    <td class="wallet-cell">${entry.wallet || '-'}</td>
+                    <td>${entry.ip || '-'}</td>
+                    <td style="font-size: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                        ${entry.userAgent ? entry.userAgent.substring(0, 50) + '...' : '-'}
+                    </td>
+                    <td class="date-cell">${formatDate(entry.createdAt)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = allData.filter(entry => 
+                entry.email.toLowerCase().includes(query) ||
+                (entry.wallet && entry.wallet.toLowerCase().includes(query))
+            );
+            renderTable(filtered);
+        });
+
+        // ============================================
+        // EXPORT CSV
+        // ============================================
+        function exportCSV() {
+            const headers = ['Email', 'Wallet', 'IP', 'User Agent', 'Referer', 'Language', 'Date'];
+            const rows = allData.map(entry => [
+                entry.email,
+                entry.wallet || '',
+                entry.ip || '',
+                entry.userAgent || '',
+                entry.referer || '',
+                entry.acceptLanguage || '',
+                entry.createdAt
+            ]);
+
+            let csvContent = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bloodcraft-waitlist-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // RECAPTCHA TOGGLE
+        // ============================================
+        const recaptchaToggle = document.getElementById('recaptchaToggle');
+        const recaptchaStatus = document.getElementById('recaptchaStatus');
+
+        // Load saved state
+        const recaptchaEnabled = localStorage.getItem('recaptcha_enabled') !== 'false';
+        recaptchaToggle.checked = recaptchaEnabled;
+        updateRecaptchaStatus(recaptchaEnabled);
+
+        recaptchaToggle.addEventListener('change', async (e) => {
+            const enabled = e.target.checked;
+            
+            try {
+                const response = await fetch('/api/admin/toggle-recaptcha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    localStorage.setItem('recaptcha_enabled', enabled);
+                    updateRecaptchaStatus(enabled);
+                    showNotification(`reCAPTCHA ${enabled ? 'enabled' : 'disabled'}`, 'success');
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error toggling reCAPTCHA:', error);
+                e.target.checked = !enabled; // Revert toggle
+                showNotification('Failed to toggle reCAPTCHA', 'error');
+            }
+        });
+
+        function updateRecaptchaStatus(enabled) {
+            if (enabled) {
+                recaptchaStatus.textContent = 'ENABLED';
+                recaptchaStatus.className = 'setting-status status-enabled';
+            } else {
+                recaptchaStatus.textContent = 'DISABLED';
+                recaptchaStatus.className = 'setting-status status-disabled';
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = type === 'success' ? 'success-message' : 'error-message';
+            notification.textContent = message;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '1000';
+            notification.style.maxWidth = '300px';
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
