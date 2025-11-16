@@ -16,7 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     
     <!-- Google reCAPTCHA v3 -->
-    
+    <script src="https://www.google.com/recaptcha/api.js?render=REPLACE_WITH_YOUR_SITE_KEY"></script>
     
     <style>
         * {
@@ -690,7 +690,6 @@
         }
 
         .toggle-switch {
-            text-align: center;
             display: inline-flex;
             background: var(--bg-card);
             border: 2px solid var(--accent);
@@ -1175,7 +1174,7 @@
         </div>
         <div class="tokenomics-grid">
             <div class="token-card">
-                <div class="token-percentage">55%</div>
+                <div class="token-percentage">40%</div>
                 <div class="token-label">Play-to-Earn Rewards</div>
                 <div class="token-desc">Distributed over 5 years to active players</div>
             </div>
@@ -1189,7 +1188,11 @@
                 <div class="token-label">Development Fund</div>
                 <div class="token-desc">Vested over 3 years for continuous updates</div>
             </div>
-            
+            <div class="token-card">
+                <div class="token-percentage">15%</div>
+                <div class="token-label">Community Treasury</div>
+                <div class="token-desc">DAO-controlled for events and partnerships</div>
+            </div>
         </div>
     </section>
 
@@ -1339,13 +1342,19 @@
         // Ethereum wallet validation
         const WALLET_REGEX = /^0x[a-fA-F0-9]{40}$/;
 
-        // Load waitlist count
+        // ============================================
+        // LOAD DATA
+        // ============================================
+        let allData = [];
+        let recaptchaEnabled = true; // Default value
+
         async function loadCount() {
             try {
                 const response = await fetch(API_ENDPOINT);
                 const data = await response.json();
                 if (data.success) {
                     countNumber.textContent = data.count;
+                    recaptchaEnabled = data.recaptchaEnabled !== false; // Update reCAPTCHA status
                 }
             } catch (error) {
                 console.error('Error loading count:', error);
@@ -1383,8 +1392,12 @@
             submitBtn.textContent = 'VERIFYING...';
 
             try {
-                // Get reCAPTCHA token
-                const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'submit' });
+                let token = null;
+
+                // Get reCAPTCHA token only if enabled
+                if (recaptchaEnabled && typeof grecaptcha !== 'undefined') {
+                    token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'submit' });
+                }
 
                 // Submit to API
                 const response = await fetch(API_ENDPOINT, {
